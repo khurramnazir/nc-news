@@ -76,9 +76,7 @@ describe("app", () => {
                       article_id: expect.any(Number),
                       body: expect.any(String),
                       topic: expect.any(String),
-                      created_at: expect(
-                        article.created_at instanceof Date
-                      ).toBe(true),
+                      created_at: expect.any(String), //expect( res.body.article[0].created_at instanceof Date).toBe(true),
                       votes: expect.any(Number),
                       comment_count: expect.any(Number),
                     }),

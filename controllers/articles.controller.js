@@ -1,10 +1,10 @@
-const { fetchArticle } = require("../models/users.models");
+const { fetchArticle } = require("../models/articles.models");
 
-exports.getUser = (req, res, next) => {
+exports.getArticle = (req, res, next) => {
   fetchArticle(req.params.article_id)
-    .then((user) => {
+    .then((article) => {
       res.status(200);
-      res.send({ user });
+      res.send({ article });
     })
     .catch((err) => {
       next(err);
