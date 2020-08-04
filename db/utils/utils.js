@@ -10,15 +10,36 @@ exports.formatDates = (list) => {
   return articleCorrectDate;
 };
 
-exports.makeRefObj = (list) => {
-  let refObj = {};
+exports.makeRefObj = (articles) => {
+  let lookup = {};
 
-  list.forEach((obj) => {
-    const owner_id = owner.owner_id;
-    const forename = owner.forename;
+  articles.forEach((article) => {
+    const article_id = article.article_id;
+    const title = article.title;
 
-    lookup[forename] = owner_id;
+    lookup[title] = article_id;
   });
+
+  return lookup;
 };
 
-exports.formatComments = (comments, articleRef) => {};
+exports.formatComments = (comments, articleRef) => {
+  const formattedComments = comments.map(function (comment) {
+    const commentCopy = { ...comment };
+    // insert artcle_id
+    const articleId = articleRef[commentCopy.belongs_to];
+    commentCopy.article_id = articleId;
+    delete commentCopy.belongs_to;
+    //insert author
+    const authorName = commentCopy.created_by;
+    commentCopy.author = authorName;
+    delete commentCopy.created_by;
+    // format timestamp
+    const formattedTimeStamp = new Date(commentCopy.created_at);
+    commentCopy.created_at = formattedTimeStamp;
+
+    return commentCopy;
+  });
+
+  return formattedComments;
+};
