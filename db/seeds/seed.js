@@ -8,28 +8,20 @@ const {
 const { formatDates, formatComments, makeRefObj } = require("../utils/utils");
 
 exports.seed = function (knex) {
-  const topicsInsertions = knex("topics").insert(topicData).returning("*");
-  const usersInsertions = knex("users").insert(userData).returning("*");
-  const articleInsertions = knex("articles")
-    .insert(formatDates(articleData))
-    .returning("*");
-
   return knex.migrate
     .rollback()
     .then(() => {
       return knex.migrate.latest();
     })
     .then(() => {
-      console.log("lets seed");
+      const topicsInsertions = knex("topics").insert(topicData);
+      const usersInsertions = knex("users").insert(userData);
+      return Promise.all([topicsInsertions, usersInsertions]);
     })
     .then(() => {
-      return Promise.all([
-        topicsInsertions,
-        usersInsertions,
-        articleInsertions,
-      ]);
+      return knex("articles").insert(formatDates(articleData)).returning("*");
     })
-    .then(([topics, users, articles]) => {
+    .then((articles) => {
       const articleRef = makeRefObj(articles);
       const formattedComments = formatComments(commentData, articleRef);
       return knex("comments").insert(formattedComments);
