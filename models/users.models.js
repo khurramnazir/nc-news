@@ -9,7 +9,7 @@ exports.fetchUser = (username) => {
       if (result.length === 0) {
         return Promise.reject({
           status: 404,
-          msg: "Invalid id",
+          msg: "Invalid username",
         });
       } else return result;
     });

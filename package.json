@@ -12,6 +12,11 @@
     "migrate-rollback": "knex migrate:rollback",
     "dev": "nodemon listen.js"
   },
+  "jest": {
+    "setupFilesAfterEnv": [
+      "jest-sorted"
+    ]
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/northcoders/be-nc-news.git"
@@ -30,6 +35,7 @@
   },
   "devDependencies": {
     "jest": "^26.2.2",
+    "jest-sorted": "^1.0.6",
     "nodemon": "^2.0.4",
     "supertest": "^4.0.2"
   }
