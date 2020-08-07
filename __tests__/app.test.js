@@ -20,21 +20,21 @@ describe("app", () => {
         });
     });
   });
-  // describe("/api", () => {
-  //   test("GET: 200 - responds with a JSON describing all the available endpoints on the API", () => {
-  //     return request(app)
-  //       .get("/api")
-  //       .expect(200)
-  //       .then((res) => {
-  //         // res.body.topics.forEach((topic) => {
-  //         //   expect.objectContaining({
-  //         //     description: expect.any(String),
-  //         //     slug: expect.any(String),
-  //         //   });
-  //         // });
-  //       });
-  //   });
-  // });
+  describe("/api", () => {
+    test("GET: 200 - responds with a JSON describing all the available endpoints on the API", () => {
+      return request(app)
+        .get("/api")
+        .expect(200)
+        .then((res) => {
+          res.body.topics.forEach((topic) => {
+            expect.objectContaining({
+              description: expect.any(String),
+              slug: expect.any(String),
+            });
+          });
+        });
+    });
+  });
 
   describe("/api", () => {
     describe("/topics", () => {
