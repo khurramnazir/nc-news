@@ -1,17 +1,57 @@
 const knex = require("../db/connection");
+const { all } = require("../app");
+
+const allAuthors = knex
+  .select("username")
+  .from("users")
+  .then((authors) => {
+    const authorsArray = authors.map((author) => {
+      return author.username;
+    });
+    return authorsArray;
+  });
+
+const allArticleIds = knex
+  .select("article_id")
+  .from("articles")
+  .then((articles) => {
+    const articleIdArray = articles.map((article) => {
+      return article.article_id;
+    });
+    return articleIdArray;
+  });
 
 exports.insertComment = (articleId, username, body) => {
-  return knex("comments")
-    .insert([{ author: username, article_id: articleId, body: body }])
-    .returning("*")
-    .then((result) => {
-      if (result.length === 0) {
+  return Promise.all([allAuthors, allArticleIds]).then(
+    ([authors, articleIds]) => {
+      if (/\d+/.test(articleId) === false) {
         return Promise.reject({
-          status: 404,
+          status: 400,
           msg: "Invalid id",
         });
-      } else return result;
-    });
+      } else if (
+        authors.includes(username) &&
+        articleIds.includes(parseInt(articleId))
+      ) {
+        return knex("comments")
+          .insert([{ author: username, article_id: articleId, body: body }])
+          .returning("*")
+          .then((result) => {
+            return result;
+          });
+      } else if (!authors.includes(username)) {
+        return Promise.reject({
+          status: 404,
+          msg: "username does not exist",
+        });
+      } else if (!articleIds.includes(articleId)) {
+        return Promise.reject({
+          status: 404,
+          msg: "article id does not exist",
+        });
+      }
+    }
+  );
 };
 
 exports.fetchCommentsByArticleId = (

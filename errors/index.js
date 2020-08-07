@@ -10,6 +10,13 @@ const handle400Error = (err, req, res, next) => {
     res.status(400).send({ msg: "Invalid id" });
   } else next(err);
 };
+
+const handle404Error = (err, req, res, next) => {
+  if (err.code === "23503") {
+    res.status(404).send({ msg: "id not found" });
+  } else next(err);
+};
+
 const handle500Error = (err, req, res, next) => {
   console.log(err);
   res.status(500).send({ msg: "internal server error" });
@@ -25,4 +32,5 @@ module.exports = {
   handleCustomError,
   handle500Error,
   handle400Error,
+  handle404Error,
 };

@@ -10,7 +10,7 @@ describe("app", () => {
     return knex.seed.run();
   });
 
-  describe("/api", () => {
+  describe("/", () => {
     test("GET: 404 - responds with an appropriate error message when provided with a path that doesn't exist", () => {
       return request(app)
         .get("/ttryfyuff")
@@ -20,6 +20,21 @@ describe("app", () => {
         });
     });
   });
+  // describe("/api", () => {
+  //   test("GET: 200 - responds with a JSON describing all the available endpoints on the API", () => {
+  //     return request(app)
+  //       .get("/api")
+  //       .expect(200)
+  //       .then((res) => {
+  //         // res.body.topics.forEach((topic) => {
+  //         //   expect.objectContaining({
+  //         //     description: expect.any(String),
+  //         //     slug: expect.any(String),
+  //         //   });
+  //         // });
+  //       });
+  //   });
+  // });
 
   describe("/api", () => {
     describe("/topics", () => {
@@ -244,7 +259,7 @@ describe("app", () => {
               expect(res.body.msg).toBe("Invalid id");
             });
         });
-        test("PATCH: 201 - responds with the updated article object", () => {
+        test("PATCH: 201 - updates vote count and responds with the updated article object", () => {
           return request(app)
             .patch("/api/articles/1")
             .send({ inc_votes: 10 })
@@ -279,7 +294,7 @@ describe("app", () => {
           return Promise.all(promises);
         });
         describe("/comments", () => {
-          test("POST: 201 - responds with the updated article object", () => {
+          test("POST: 201 - sends comment and responds with the sent comment", () => {
             return request(app)
               .post("/api/articles/1/comments")
               .send({ username: "lurker", body: "great article" })
@@ -297,6 +312,33 @@ describe("app", () => {
                     }),
                   ])
                 );
+              });
+          });
+          test("POST: 400 - responds with an appropriate error message when provided with an article id that is not a number", () => {
+            return request(app)
+              .post("/api/articles/onetwothree/comments")
+              .send({ username: "lurker", body: "great article" })
+              .expect(400)
+              .then((res) => {
+                expect(res.body.msg).toBe("Invalid id");
+              });
+          });
+          test("POST: 404 - responds with an appropriate error message when provided with an article id that doesn't exist", () => {
+            return request(app)
+              .post("/api/articles/9999999/comments")
+              .send({ username: "lurker", body: "great article" })
+              .expect(404)
+              .then((res) => {
+                expect(res.body.msg).toBe("article id does not exist");
+              });
+          });
+          test("POST: 404 - responds with an appropriate error message when provided with a username that doesn't exist", () => {
+            return request(app)
+              .post("/api/articles/1/comments")
+              .send({ username: "ljerughreu", body: "great article" })
+              .expect(404)
+              .then((res) => {
+                expect(res.body.msg).toBe("username does not exist");
               });
           });
           test("GET: 400 - responds with an appropriate error message when provided with an article id that is not a number", () => {
@@ -470,6 +512,22 @@ describe("app", () => {
             .send({ inc_votes: 10 })
             .then((res) => {
               expect(res.body.msg).toBe("comment id not found");
+            });
+        });
+        test("DELETE: 400 - responds with an appropriate error message when provided with an comment id that is not a number", () => {
+          return request(app)
+            .del("/api/comments/onetwothree")
+            .expect(400)
+            .then((res) => {
+              expect(res.body.msg).toBe("Invalid id");
+            });
+        });
+        test("DELETE: 404 - responds with an appropriate error message when provided with an article id that doesn't exist", () => {
+          return request(app)
+            .del("/api/comments/999999")
+            .expect(404)
+            .then((res) => {
+              expect(res.body.msg).toBe("Invalid id");
             });
         });
         test("INVALID METHODS: 405 - responds with an error when an invalid method is attempted", () => {

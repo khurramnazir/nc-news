@@ -4,6 +4,7 @@ const {
   handleCustomError,
   handle500Error,
   handle400Error,
+  handle404Error,
 } = require("./errors/index");
 
 const app = express();
@@ -13,6 +14,7 @@ app.use("/api", apiRouter);
 
 app.use(handleCustomError);
 app.use(handle400Error);
+app.use(handle404Error);
 app.use(handle500Error);
 
 app.all("*", (req, res, next) => {
