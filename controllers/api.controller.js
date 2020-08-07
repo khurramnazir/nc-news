@@ -1,13 +1,8 @@
-const { fetchAllApiEndpoints } = require("../models/api.model");
+// const { fetchAllApiEndpoints } = require("../models/api.model");
 
 exports.getApiEndpoints = (req, res, next) => {
-  fetchAllApiEndpoints()
-    .then((endpoints) => {
-      console.log(endpoints);
-      res.status(200);
-      res.send({ endpoints });
-    })
-    .catch((err) => {
-      next(err);
-    });
+  fetchAllApiEndpoints((error, endpoints) => {
+    if (error) next(error);
+    else response.send({ endpoints });
+  });
 };

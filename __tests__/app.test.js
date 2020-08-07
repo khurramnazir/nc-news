@@ -21,17 +21,12 @@ describe("app", () => {
     });
   });
   describe("/api", () => {
-    test("GET: 200 - responds with a JSON describing all the available endpoints on the API", () => {
+    test("GET: 200 - responds with a JSON of all endpoints", () => {
       return request(app)
         .get("/api")
         .expect(200)
         .then((res) => {
-          res.body.topics.forEach((topic) => {
-            expect.objectContaining({
-              description: expect.any(String),
-              slug: expect.any(String),
-            });
-          });
+          expect(typeof res.body).toBe("object");
         });
     });
   });
@@ -110,22 +105,24 @@ describe("app", () => {
   });
   describe("/api", () => {
     describe("/articles", () => {
-      test("GET: 200 - responds with an array containing all article objects", () => {
+      test.only("GET: 200 - responds with an array containing all article objects", () => {
         return request(app)
           .get("/api/articles")
           .expect(200)
           .then((res) => {
             res.body.articles.forEach((article) => {
-              expect.objectContaining({
-                author: expect.any(String),
-                title: expect.any(String),
-                article_id: expect.any(Number),
-                body: expect.any(String),
-                topic: expect.any(String),
-                created_at: expect.any(String),
-                votes: expect.any(Number),
-                comment_count: expect.any(String),
-              });
+              expect(article).toEqual(
+                expect.objectContaining({
+                  author: expect.any(String),
+                  title: expect.any(String),
+                  article_id: expect.any(Number),
+                  body: expect.any(String),
+                  topic: expect.any(String),
+                  created_at: expect.any(String),
+                  votes: expect.any(Number),
+                  comment_count: expect.any(String),
+                })
+              );
             });
           });
       });
@@ -363,14 +360,16 @@ describe("app", () => {
               .expect(200)
               .then((res) => {
                 res.body.comments.forEach((comment) => {
-                  expect.objectContaining({
-                    comment_id: expect.any(Number),
-                    author: expect.any(String),
-                    article_id: expect.any(Number),
-                    votes: expect.any(Number),
-                    created_at: expect.any(String),
-                    body: expect.any(String),
-                  });
+                  expect(comment).toEqual(
+                    expect.objectContaining({
+                      comment_id: expect.any(Number),
+                      author: expect.any(String),
+                      article_id: expect.any(Number),
+                      votes: expect.any(Number),
+                      created_at: expect.any(String),
+                      body: expect.any(String),
+                    })
+                  );
                 });
               });
           });

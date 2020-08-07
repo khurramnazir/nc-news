@@ -4,13 +4,15 @@ const usersRouter = require("./users.router");
 const articlesRouter = require("./articles.router");
 const commentsRouter = require("./comments.router");
 
-const { getApiEndpoints } = require("../controllers/api.controller");
-const { handle405error } = require("../errors");
+const apiJSON = require("../endpoints.json");
 
 apiRouter.use("/topics", topicsRouter);
 apiRouter.use("/users", usersRouter);
 apiRouter.use("/articles", articlesRouter);
 apiRouter.use("/comments", commentsRouter);
-apiRouter.route("/").all(getApiEndpoints).all(handle405error);
+apiRouter.route("/").get((req, res, next) => {
+  res.status(200);
+  res.send(apiJSON);
+});
 
 module.exports = apiRouter;
