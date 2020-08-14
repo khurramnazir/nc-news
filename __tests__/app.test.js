@@ -105,7 +105,7 @@ describe("app", () => {
   });
   describe("/api", () => {
     describe("/articles", () => {
-      test.only("GET: 200 - responds with an array containing all article objects", () => {
+      test("GET: 200 - responds with an array containing all article objects", () => {
         return request(app)
           .get("/api/articles")
           .expect(200)
@@ -197,12 +197,36 @@ describe("app", () => {
             });
           });
       });
-      test("GET: 404 - responds with an appropriate error message when provided with a topic or author that doesn't exist", () => {
+      test("GET: 404 - responds with an appropriate error message when provided with a topic that doesn't exist", () => {
         return request(app)
-          .get("/api/articles?topic=mitcgh&author=bob")
+          .get("/api/articles?topic=doesnotexist")
           .expect(404)
           .then((res) => {
-            expect(res.body.msg).toBe("Invalid name or topic");
+            expect(res.body.msg).toBe("topic does not exist");
+          });
+      });
+      test("GET: 404 - responds with an appropriate error message when provided with an author that doesn't exist", () => {
+        return request(app)
+          .get("/api/articles?topic=mitch&author=doesnotexist")
+          .expect(404)
+          .then((res) => {
+            expect(res.body.msg).toBe("author does not exist");
+          });
+      });
+      test("GET: 404 - responds with an appropriate error message when provided with a topic that doesn't exist but an author that does", () => {
+        return request(app)
+          .get("/api/articles?topic=doesnotexist&author=icellusedkars")
+          .expect(404)
+          .then((res) => {
+            expect(res.body.msg).toBe("topic does not exist");
+          });
+      });
+      test("GET: 404 - responds with an appropriate error message when provided with an author that doesn't exist but a topic that does", () => {
+        return request(app)
+          .get("/api/articles?topic=mitch&author=doesntnotexist")
+          .expect(404)
+          .then((res) => {
+            expect(res.body.msg).toBe("author does not exist");
           });
       });
       test("INVALID METHODS: 405 - responds with an error when an invalid method is attempted", () => {
