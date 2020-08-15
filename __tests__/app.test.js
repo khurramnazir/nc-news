@@ -69,14 +69,12 @@ describe("app", () => {
             .expect(200)
             .then((res) => {
               expect(res.body.user).toEqual(
-                expect.arrayContaining([
-                  expect.objectContaining({
-                    username: "lurker",
-                    avatar_url:
-                      "https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png",
-                    name: "do_nothing",
-                  }),
-                ])
+                expect.objectContaining({
+                  username: "lurker",
+                  avatar_url:
+                    "https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png",
+                  name: "do_nothing",
+                })
               );
             });
         });
@@ -229,6 +227,14 @@ describe("app", () => {
             expect(res.body.msg).toBe("author does not exist");
           });
       });
+      test("GET: 400 - responds with an appropriate error message when provided with a column to sort by that doesn't exist", () => {
+        return request(app)
+          .get("/api/articles?sort_by=columnthatdoesntexist")
+          .expect(400)
+          .then((res) => {
+            expect(res.body.msg).toBe("Invalid sort by column");
+          });
+      });
       test("INVALID METHODS: 405 - responds with an error when an invalid method is attempted", () => {
         const invalidMethods = ["put", "post", "delete", "patch"];
         const promises = invalidMethods.map((method) => {
@@ -249,18 +255,16 @@ describe("app", () => {
             .expect(200)
             .then((res) => {
               expect(res.body.article).toEqual(
-                expect.arrayContaining([
-                  expect.objectContaining({
-                    author: expect.any(String),
-                    title: expect.any(String),
-                    article_id: expect.any(Number),
-                    body: expect.any(String),
-                    topic: expect.any(String),
-                    created_at: expect.any(String),
-                    votes: expect.any(Number),
-                    comment_count: expect.any(String),
-                  }),
-                ])
+                expect.objectContaining({
+                  author: expect.any(String),
+                  title: expect.any(String),
+                  article_id: expect.any(Number),
+                  body: expect.any(String),
+                  topic: expect.any(String),
+                  created_at: expect.any(String),
+                  votes: expect.any(Number),
+                  comment_count: expect.any(String),
+                })
               );
             });
         });
@@ -280,25 +284,43 @@ describe("app", () => {
               expect(res.body.msg).toBe("Invalid id");
             });
         });
-        test("PATCH: 201 - updates vote count and responds with the updated article object", () => {
+        test("PATCH: 200 - updates vote count and responds with the updated article object", () => {
           return request(app)
             .patch("/api/articles/1")
             .send({ inc_votes: 10 })
-            .expect(201)
+            .expect(200)
             .then((res) => {
               expect(res.body.article).toEqual(
-                expect.arrayContaining([
-                  expect.objectContaining({
-                    author: expect.any(String),
-                    title: expect.any(String),
-                    article_id: expect.any(Number),
-                    body: expect.any(String),
-                    topic: expect.any(String),
-                    created_at: expect.any(String),
-                    votes: 110,
-                    comment_count: expect.any(String),
-                  }),
-                ])
+                expect.objectContaining({
+                  author: expect.any(String),
+                  title: expect.any(String),
+                  article_id: expect.any(Number),
+                  body: expect.any(String),
+                  topic: expect.any(String),
+                  created_at: expect.any(String),
+                  votes: 110,
+                  comment_count: expect.any(String),
+                })
+              );
+            });
+        });
+        test("PATCH: 200 - returns unchanged article when sent an empty patch request", () => {
+          return request(app)
+            .patch("/api/articles/1")
+            .send({})
+            .expect(200)
+            .then((res) => {
+              expect(res.body.article).toEqual(
+                expect.objectContaining({
+                  author: expect.any(String),
+                  title: expect.any(String),
+                  article_id: expect.any(Number),
+                  body: expect.any(String),
+                  topic: expect.any(String),
+                  created_at: expect.any(String),
+                  votes: 100,
+                  comment_count: expect.any(String),
+                })
               );
             });
         });
@@ -322,16 +344,14 @@ describe("app", () => {
               .expect(201)
               .then((res) => {
                 expect(res.body.comment).toEqual(
-                  expect.arrayContaining([
-                    expect.objectContaining({
-                      comment_id: 19,
-                      author: "lurker",
-                      article_id: 1,
-                      votes: 0,
-                      created_at: expect.any(String),
-                      body: "great article",
-                    }),
-                  ])
+                  expect.objectContaining({
+                    comment_id: 19,
+                    author: "lurker",
+                    article_id: 1,
+                    votes: 0,
+                    created_at: expect.any(String),
+                    body: "great article",
+                  })
                 );
               });
           });
@@ -342,6 +362,15 @@ describe("app", () => {
               .expect(400)
               .then((res) => {
                 expect(res.body.msg).toBe("Invalid id");
+              });
+          });
+          test("POST: 400 - responds with an appropriate error message when post request is missing required data", () => {
+            return request(app)
+              .post("/api/articles/1/comments")
+              .send({ body: "great article" })
+              .expect(400)
+              .then((res) => {
+                expect(res.body.msg).toBe("username AND body required");
               });
           });
           test("POST: 404 - responds with an appropriate error message when provided with an article id that doesn't exist", () => {
@@ -375,12 +404,12 @@ describe("app", () => {
               .get("/api/articles/999999/comments")
               .expect(404)
               .then((res) => {
-                expect(res.body.msg).toBe("Article id not found");
+                expect(res.body.msg).toBe("article id does not exist");
               });
           });
           test("GET: 200 - responds with an array of comments for specified article id", () => {
             return request(app)
-              .get("/api/articles/1/comments")
+              .get("/api/articles/2/comments")
               .expect(200)
               .then((res) => {
                 res.body.comments.forEach((comment) => {
@@ -437,6 +466,14 @@ describe("app", () => {
                 });
               });
           });
+          test("GET: 400 - responds with an appropriate error message when provided with a column to sort by that doesn't exist", () => {
+            return request(app)
+              .get("/api/articles/1/comments?sort_by=not-a-valid-column")
+              .expect(400)
+              .then((res) => {
+                expect(res.body.msg).toBe("Invalid sort by column");
+              });
+          });
           test("INVALID METHODS: 405 - responds with an error when an invalid method is attempted", () => {
             const invalidMethods = ["put", "delete", "patch"];
             const promises = invalidMethods.map((method) => {
@@ -485,23 +522,21 @@ describe("app", () => {
         return Promise.all(promises);
       });
       describe("/:comment_id", () => {
-        test("PATCH: 201 - updates votes on comment and responds with the updated comment object", () => {
+        test("PATCH: 200 - updates votes on comment and responds with the updated comment object", () => {
           return request(app)
             .patch("/api/comments/1")
             .send({ inc_votes: 10 })
-            .expect(201)
+            .expect(200)
             .then((res) => {
               expect(res.body.comment).toEqual(
-                expect.arrayContaining([
-                  expect.objectContaining({
-                    comment_id: 1,
-                    author: expect.any(String),
-                    article_id: expect.any(Number),
-                    votes: 26,
-                    created_at: expect.any(String),
-                    body: expect.any(String),
-                  }),
-                ])
+                expect.objectContaining({
+                  comment_id: 1,
+                  author: expect.any(String),
+                  article_id: expect.any(Number),
+                  votes: 26,
+                  created_at: expect.any(String),
+                  body: expect.any(String),
+                })
               );
             });
         });

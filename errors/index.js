@@ -8,6 +8,8 @@ const handleCustomError = (err, req, res, next) => {
 const handle400Error = (err, req, res, next) => {
   if (err.code === "22P02") {
     res.status(400).send({ msg: "Invalid id" });
+  } else if (err.code === "42703") {
+    res.status(400).send({ msg: "Invalid sort by column" });
   } else next(err);
 };
 

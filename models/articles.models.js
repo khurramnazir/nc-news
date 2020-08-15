@@ -6,21 +6,6 @@ exports.fetchAllArticles = (
   author,
   topic
 ) => {
-  // const checkAuthorExists = knex
-  //   .select("username")
-  //   .from("users")
-  //   .where("username", author)
-  //   .then((chosenAuthor) => {
-  //     return chosenAuthor;
-  //   });
-  // const checkTopicExists = knex
-  //   .select("slug")
-  //   .from("topics")
-  //   .where("slug", topic)
-  //   .then((chosenTopic) => {
-  //     return chosenTopic;
-  //   });
-
   if (author && topic) {
     const checkAuthorExists = knex
       .select("username")
@@ -37,13 +22,13 @@ exports.fetchAllArticles = (
         return chosenTopic;
       });
     return Promise.all([checkAuthorExists, checkTopicExists]).then(
-      ([author, topic]) => {
-        if (author.length === 0) {
+      ([chosenAuthor, chosenTopic]) => {
+        if (chosenAuthor.length === 0) {
           return Promise.reject({
             status: 404,
             msg: "author does not exist",
           });
-        } else if (topic.length === 0) {
+        } else if (chosenTopic.length === 0) {
           return Promise.reject({
             status: 404,
             msg: "topic does not exist",
@@ -59,6 +44,9 @@ exports.fetchAllArticles = (
             .modify((query) => {
               if (author) query.where("articles.author", author);
               if (topic) query.where("articles.topic", topic);
+            })
+            .then((result) => {
+              return result;
             });
         }
       }
@@ -71,8 +59,8 @@ exports.fetchAllArticles = (
       .then((chosenAuthor) => {
         return chosenAuthor;
       });
-    return Promise.all([checkAuthorExists]).then(([author]) => {
-      if (author.length === 0) {
+    return Promise.all([checkAuthorExists]).then(([chosenAuthor]) => {
+      if (chosenAuthor.length === 0) {
         return Promise.reject({
           status: 404,
           msg: "author does not exist",
@@ -88,6 +76,9 @@ exports.fetchAllArticles = (
           .modify((query) => {
             if (author) query.where("articles.author", author);
             if (topic) query.where("articles.topic", topic);
+          })
+          .then((result) => {
+            return result;
           });
       }
     });
@@ -99,8 +90,8 @@ exports.fetchAllArticles = (
       .then((chosenTopic) => {
         return chosenTopic;
       });
-    return Promise.all([checkTopicExists]).then(([topic]) => {
-      if (topic.length === 0) {
+    return Promise.all([checkTopicExists]).then(([chosenTopic]) => {
+      if (chosenTopic.length === 0) {
         return Promise.reject({
           status: 404,
           msg: "topic does not exist",
@@ -116,6 +107,9 @@ exports.fetchAllArticles = (
           .modify((query) => {
             if (author) query.where("articles.author", author);
             if (topic) query.where("articles.topic", topic);
+          })
+          .then((result) => {
+            return result;
           });
       }
     });
@@ -130,6 +124,9 @@ exports.fetchAllArticles = (
       .modify((query) => {
         if (author) query.where("articles.author", author);
         if (topic) query.where("articles.topic", topic);
+      })
+      .then((result) => {
+        return result;
       });
   }
 };
@@ -148,7 +145,7 @@ exports.fetchArticle = (article_id) => {
           status: 404,
           msg: "Article id not found",
         });
-      } else return result;
+      } else return result[0];
     });
 };
 
@@ -157,7 +154,9 @@ exports.addVotesToArticle = (article_id, votes) => {
     .select("articles.*")
     .from("articles")
     .where("articles.article_id", article_id)
-    .increment("votes", votes)
+    .modify((query) => {
+      if (votes) query.increment("votes", votes);
+    })
     .then((result) => {
       if (result === 0) {
         return Promise.reject({

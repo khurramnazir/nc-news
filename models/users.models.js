@@ -11,6 +11,6 @@ exports.fetchUser = (username) => {
           status: 404,
           msg: "Invalid username",
         });
-      } else return result;
+      } else return result[0];
     });
 };

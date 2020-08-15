@@ -39,7 +39,7 @@ exports.patchComment = (req, res, next) => {
   const votes = req.body.inc_votes;
   updateComment(commentId, votes)
     .then((comment) => {
-      res.status(201);
+      res.status(200);
       res.send({ comment });
     })
     .catch((err) => {

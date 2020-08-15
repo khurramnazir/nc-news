@@ -22,36 +22,43 @@ const allArticleIds = knex
   });
 
 exports.insertComment = (articleId, username, body) => {
-  return Promise.all([allAuthors, allArticleIds]).then(
-    ([authors, articleIds]) => {
-      if (/\d+/.test(articleId) === false) {
-        return Promise.reject({
-          status: 400,
-          msg: "Invalid id",
-        });
-      } else if (
-        authors.includes(username) &&
-        articleIds.includes(parseInt(articleId))
-      ) {
-        return knex("comments")
-          .insert([{ author: username, article_id: articleId, body: body }])
-          .returning("*")
-          .then((result) => {
-            return result;
+  if (username === undefined || body === undefined) {
+    return Promise.reject({
+      status: 400,
+      msg: "username AND body required",
+    });
+  } else {
+    return Promise.all([allAuthors, allArticleIds]).then(
+      ([authors, articleIds]) => {
+        if (/\d+/.test(articleId) === false) {
+          return Promise.reject({
+            status: 400,
+            msg: "Invalid id",
           });
-      } else if (!authors.includes(username)) {
-        return Promise.reject({
-          status: 404,
-          msg: "username does not exist",
-        });
-      } else if (!articleIds.includes(articleId)) {
-        return Promise.reject({
-          status: 404,
-          msg: "article id does not exist",
-        });
+        } else if (
+          authors.includes(username) &&
+          articleIds.includes(parseInt(articleId))
+        ) {
+          return knex("comments")
+            .insert([{ author: username, article_id: articleId, body: body }])
+            .returning("*")
+            .then((result) => {
+              return result[0];
+            });
+        } else if (!authors.includes(username)) {
+          return Promise.reject({
+            status: 404,
+            msg: "username does not exist",
+          });
+        } else if (!articleIds.includes(articleId)) {
+          return Promise.reject({
+            status: 404,
+            msg: "article id does not exist",
+          });
+        }
       }
-    }
-  );
+    );
+  }
 };
 
 exports.fetchCommentsByArticleId = (
@@ -59,19 +66,30 @@ exports.fetchCommentsByArticleId = (
   order = "desc",
   sort_by = "created_at"
 ) => {
-  return knex
-    .select("*")
-    .from("comments")
+  const checkArticleIdExists = knex
+    .select("article_id")
+    .from("articles")
     .where("article_id", articleId)
-    .orderBy(sort_by, order)
-    .then((result) => {
-      if (result.length === 0) {
-        return Promise.reject({
-          status: 404,
-          msg: "Article id not found",
-        });
-      } else return result;
+    .then((chosenArticleId) => {
+      return chosenArticleId;
     });
+  return Promise.all([checkArticleIdExists]).then(([chosenArticleId]) => {
+    if (chosenArticleId.length === 0) {
+      return Promise.reject({
+        status: 404,
+        msg: "article id does not exist",
+      });
+    } else {
+      return knex
+        .select("*")
+        .from("comments")
+        .where("article_id", articleId)
+        .orderBy(sort_by, order)
+        .then((result) => {
+          return result;
+        });
+    }
+  });
 };
 
 exports.updateComment = (commentId, votes) => {
@@ -87,7 +105,7 @@ exports.updateComment = (commentId, votes) => {
           status: 404,
           msg: "comment id not found",
         });
-      } else return result;
+      } else return result[0];
     });
 };
 
