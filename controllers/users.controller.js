@@ -1,9 +1,7 @@
 const { fetchUser, fetchAllUsers } = require("../models/users.models");
 
 exports.getAllUsers = (req, res, next) => {
-  const { sort_by, order, author, topic } = req.query;
-
-  fetchAllUsers(sort_by, order, author, topic)
+  fetchAllUsers()
     .then((users) => {
       res.status(200);
       res.send({ users });
